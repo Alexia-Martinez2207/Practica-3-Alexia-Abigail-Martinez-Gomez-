@@ -13,79 +13,101 @@ Profundizar en el análisis exploratorio de datos mediante la creación de una *
 
 ---
 
-## Requisitos de la Práctica
+## Preprocesamiento de Datos
 
-### 1. Preprocesamiento
-- Eliminar columnas con más del **20% de valores nulos**.  
-- Imputar valores faltantes restantes usando:  
-  - Media / mediana para numéricos  
-  - Moda para categóricos  
-- Detectar y tratar **valores atípicos (outliers)** con IQR o z-score.
-
-### 2. Análisis de Datos
-- Crear función `check_data_completeness_nombrecompleto(df)` que retorne:  
-  - Conteo de nulos  
-  - Porcentaje de completitud  
-  - Tipo de dato  
-  - Estadísticos de dispersión  
-- Clasificar automáticamente columnas en:  
-  - **Continuas:** más de 10 valores únicos y tipo numérico  
-  - **Discretas:** menos de 10 valores únicos
-
-### 3. Visualizaciones
-- Crear gráficos con funciones personalizadas y opcionalmente interactivas:  
-  - **Histogramas:** línea de densidad + KDE + customizable por grupo  
-  - **Boxplots:** subgráficos por clase objetivo  
-  - **Barras horizontales:** ordenadas por frecuencia descendente  
-  - **Líneas:** simular serie temporal  
-  - **Dot plots:** comparación entre 2 grupos (overlay)  
-  - **Densidad:** múltiples clases con colores distintos  
-  - **Violín:** overlay con swarmplot  
-  - **Heatmap:** correlación + anotaciones y selección de método (`pearson`, `spearman`)
-
-### 4. Librería Python
-- Crear módulo `ctg_viz/` con la siguiente estructura:
-
-ctg_viz/
-├── init.py
-├── preprocessing.py
-├── categorization.py
-├── plots/
-│ ├── histograms.py
-│ ├── boxplots.py
-│ ├── barplots.py
-│ ├── density.py
-│ └── heatmap.py
-├── utils.py
-
-- Todo el código debe tener:  
-  - **Tipado estático**: `def func(x: pd.DataFrame) -> pd.DataFrame`  
-  - **Docstrings** (estilo Google o NumPy)  
-  - **Pruebas básicas** con pytest
-
-### 5. Validación y Reporte
-- Crear **pruebas unitarias** para al menos 4 funciones clave  
-- Generar **Jupyter Notebook de ejemplo** con uso de cada función  
-- Exportar **reporte en PDF** con:  
-  - Descripción de funciones  
-  - Visualizaciones generadas  
-  - Recomendaciones analíticas breves
+- Se eliminaron columnas con más del **20% de valores nulos**.  
+- Los valores faltantes restantes se imputaron:  
+  - **Numéricos:** media y mediana  
+  - **Categóricos:** moda  
+- Detección y tratamiento de **outliers** pendiente (IQR o z-score) según el reto de la práctica.  
 
 ---
 
-Ejemplo de uso de la librería:
-from ctg_viz.preprocessing import imputar_valores
+## Análisis de Datos
+
+Se creó la función:
+
+check_data_completeness_numer(df: pd.DataFrame) -> pd.DataFrame
+Que realiza:
+* Conteo de valores nulos
+* Porcentaje de completitud
+* Tipo de dato
+* Estadísticos de dispersión (min, max, std, var, IQR)
+* Clasificación de columnas en:
+* Continuas: >10 valores únicos
+* Discretas: ≤10 valores únicos
+  
+Ejemplo de uso:
+
+resumen = check_data_completeness_numer(df)
+print(resumen)
+
+Visualizaciones
+Se implementaron varias funciones de visualización personalizadas:
+
+1. Histograma
+Función estática con seaborn:
+
+plot_histogram(df, column="LB", kde=True)
+
+plot_histogram(df, column="LB", group="NSP")
+
+plot_histogram(df, "AC", bins=50)
+
+Permite agrupar por categoría (group) y mostrar KDE (línea de densidad).
+
+Configuración de bins y tamaño de figura.
+
+2. Histograma Interactivo
+
+Función con Plotly para exploración dinámica:
+
+plot_histogram_interactive(df, "LB", group="NSP")
+Permite zoom, hover y exploración de los datos de manera interactiva.
+
+3. Boxplots por clase
+
+Función con Plotly que genera subplots por clase objetivo:
+
+boxplot_by_class(df, numeric_col="LB", class_col="NSP")
+
+Cada clase se muestra en un subplot separado.
+Incluye media en cada boxplot.
+
+El código puede organizarse como un módulo ctg_viz/ con submódulos:
+
+ctg_viz/
+
+├── __init__.py
+
+├── preprocessing.py
+
+├── categorization.py
+
+├── plots/
+
+│   ├── histograms.py
+
+│   ├── boxplots.py
+
+│   ├── barplots.py
+
+│   ├── density.py
+
+│   └── heatmap.py
+
+├── utils.py
+
+Ejemplo de uso de las funciones directamente:
+
+from ctg_viz.preprocessing import check_data_completeness_numer
+
 from ctg_viz.plots.histograms import plot_histogram
 
-# Cargar dataset
-import pandas as pd
-df = pd.read_csv("CTG.csv")
+from ctg_viz.plots.boxplots import boxplot_by_class
 
-# Preprocesar datos
-df = imputar_valores(df)
+resumen = check_data_completeness_numer(df)
 
-# Visualizar
-plot_histogram(df, columna="FHR")
+plot_histogram(df, column="LB", kde=True)
 
-
-Para más ejemplos, consultar el Notebook de demostración incluido.
+boxplot_by_class(df, numeric_col="LB", class_col="NSP")
